@@ -1,0 +1,69 @@
+01_Initial_Data_Download.R:
+
+Purpose: Download raw multi-omics data from TCGA-BRCA
+
+1. Installs and loads required Bioconductor packages (TCGAbiolinks, SummarizedExperiment, sesame)
+Queries and downloads:
+- DNA methylation (Illumina Human Methylation 450K beta values)
+- RNA-seq gene expression (STAR - Counts workflow)
+- Clinical metadata from TCGA-BRCA
+
+2. Converts GDC query results into R SummarizedExperiment objects
+
+3. Saves raw datasets as .RDS files for reproducible reuse:
+- meth_tcga_brca.rds
+- rna_tcga_brca.rds
+- clinical_brca.rds
+
+--------------------------------------------------------------------------------
+
+02_Merge_Data.R:
+
+Purpose: Preprocess and harmonize datasets for Luminal A / Luminal B analysis
+
+Loads previously saved raw TCGA datasets
+Retrieves PAM50 molecular subtype classification using TCGAquery_subtype()
+
+Filters cohort to include only:
+- Luminal A (LumA)
+- Luminal B (LumB)
+
+Ensures multi-omics availability by intersecting:
+- Methylation samples
+- RNA-seq samples
+- Clinical samples
+- Luminal subtype patients
+Results in a harmonized cohort of patients with complete data across all modalities
+
+Subsets all datasets to shared patients
+
+Adds PAM50 subtype labels to clinical metadata
+
+Synchronizes sample order across all datasets to ensure correct alignment
+
+Extracts final analysis matrices:
+- beta (CpG × samples methylation matrix)
+- rna_mat (gene × samples expression matrix)
+- y (LumA vs LumB labels)
+
+Packages all objects into a single multi-omics list
+
+Saves final processed dataset as:
+- multiomics_luminal_brca.rds
+
+--------------------------------------------------------------------------------
+
+03_Check_Missings.R:
+
+Load processed multi-omics dataset for downstream analysis
+
+Extracts:
+- DNA methylation matrix (beta)
+- RNA expression matrix (rna_mat)
+- Clinical metadata (clinical_common)
+- PAM50 labels (y)
+
+Provides ready-to-use objects for downstream analyses.
+
+- ToDo: Check Missing Values / Exploratory Analsis. 
+
