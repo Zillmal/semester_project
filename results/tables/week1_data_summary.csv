@@ -1,0 +1,10 @@
+metric,value
+Patients with matched omics and clinical data,563.0
+Luminal A patients,422.0
+Luminal B patients,141.0
+PAM50 RNA features retained,50.0
+Promoter CpG methylation features retained,572.0
+Overall RNA missingness,0.0
+Overall methylation missingness,0.09705747183544695
+Patients with valid survival outcome,556.0
+Deaths/events,65.0
