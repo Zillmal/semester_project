@@ -1,4 +1,10 @@
 GDCdata/
-data/
+data/*
 .Rproj.user/
 .DS_Store
+
+# Allow selected processed files
+!data/processed/
+data/processed/*
+!data/processed/survival_luminal_clean.csv
+!data/processed/cv_fold_assignments.csv
