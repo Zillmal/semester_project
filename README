@@ -99,9 +99,104 @@ Output:
 
 --------------------------------------------------------------------------------
 
+05_export_for_python.R:
+
+Purpose: Export the PAM50 feature dataset from R to Python-friendly CSV files
+
+Loads:
+
+* pam50_features_brca.rds
+
+Verifies that RNA, methylation, clinical metadata, and subtype labels are aligned
+to the same patient order.
+
+Transposes the RNA and methylation matrices so that:
+
+* rows = patients
+* columns = molecular features
+
+Exports:
+
+* rna_pam50.csv
+* meth_pam50.csv
+* clinical_luminal_brca.csv
+* labels_luminal_brca.csv
+
+These files are saved in data/processed/ for use in Python-based exploratory
+analysis, cross-validation, imputation, and survival modeling.
+
+--------------------------------------------------------------------------------
+
+06_week1_eda.ipynb / 06_week1_eda.py:
+
+Purpose: Perform initial exploratory data analysis of the exported PAM50 cohort
+
+Loads the Python-ready RNA, methylation, clinical, and subtype-label files.
+
+Checks:
+
+* patient alignment across all exported datasets
+* number of patients and molecular features
+* Luminal A and Luminal B subtype distribution
+* RNA and methylation missingness
+* availability and structure of overall survival variables
+
+Generates:
+
+* subtype distribution plot
+* methylation missingness per patient plot
+* methylation missingness per CpG plot
+* survival event proportion by subtype plot
+* Week 1 cohort summary table
+
+Creates and saves a cleaned survival outcome table containing:
+
+* patient ID
+* PAM50 subtype
+* survival event indicator
+* overall survival time
+
+--------------------------------------------------------------------------------
+
+07_create_cv_folds.ipynb / 07_create_cv_folds.py:
+
+Purpose: Create reproducible stratified cross-validation folds for survival modeling
+
+Loads the cleaned survival outcome table created during Week 1 EDA.
+
+Creates a combined stratification label based on:
+
+* PAM50 subtype (LumA or LumB)
+* survival event status (event or censored)
+
+Uses 5-fold stratified cross-validation to preserve the approximate distribution
+of Luminal A/Luminal B tumors and survival events across folds.
+
+Saves:
+
+* cv_fold_assignments.csv
+* cv_fold_distribution.csv
+* cv_fold_proportions.csv
+
+The saved fold assignments will be reused for all later survival models so that
+the mRNA-only baseline and integrated methylation + mRNA model are evaluated on
+the same patient splits.
+
+
+--------------------------------------------------------------------------------
+
 How to run:
 
-Run the scripts in numerical order (01 -> 02 -> 03 -> 04) from the repository
+Run the scripts in numerical order (01 -> 02 -> 03 -> 04 -> 05) from the repository
 root. Script 01 downloads the raw TCGA data (several GB) and only needs to run
 once. The data/ folder is git-ignored, so the .rds files stay local and are not
 pushed to the repository.
+
+After exporting the data, run the Python notebooks/scripts:
+
+06_Week1_EDA.ipynb / 06_Week1_EDA.py -> 07_Create_CV_Folds.ipynb /
+07_Create_CV_Folds.py
+
+Small reproducibility outputs, including the cleaned survival table and
+cross-validation fold assignments, may be tracked in Git. Large RNA and
+methylation CSV files remain git-ignored.
