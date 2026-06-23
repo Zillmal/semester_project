@@ -1,0 +1,10 @@
+metric,value
+patients,563.0
+promoter_CpGs,572.0
+promoter_CpGs_imputed,527.0
+KNN_neighbors,10.0
+missing_values_before,31256.0
+missing_values_after,0.0
+overall_missing_fraction_before,0.09705747183544695
+min_beta_after_imputation,0.0051725848890228
+max_beta_after_imputation,0.994023912611708
