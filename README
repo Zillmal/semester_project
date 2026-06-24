@@ -269,16 +269,19 @@ Loads:
 * cv_fold_assignments.csv
 
 Fits a LASSO-penalized Cox proportional-hazards model on the log2-normalized PAM50
-mRNA features using the shared 5-fold CV splits. Nested cross-validation is used:
-the outer loop is the shared fold assignment, while an inner loop selects the L1
-penalty. Feature scaling and penalty selection are fit on the training patients of
-each fold only, so there is no leakage. Reports the per-fold concordance index
-(C-index) and the mean +/- sd benchmark that the integrated methylation + mRNA
-model must beat.
+mRNA features using the shared 5-fold CV splits. The model uses scikit-survival's
+Coxnet (the same engine and nested-CV scheme as the multi-omics model 12, so the two
+LASSO C-indices are directly comparable). Nested cross-validation is used: the outer
+loop is the shared fold assignment, while an inner 5-fold loop selects the L1 penalty.
+Feature scaling and penalty selection are fit on the training patients of each fold
+only, so there is no leakage. Reports the per-fold concordance index (C-index) and
+the mean +/- sd benchmark that the integrated methylation + mRNA model must beat.
+
+Requires scikit-survival (pip install scikit-survival).
 
 Output:
 
-* lasso_cox_cv_results.csv (per-fold penalty, number of genes selected, test C-index)
+* lasso_cox_cv_results.csv (per-fold alpha, number of genes selected, test C-index)
 
 --------------------------------------------------------------------------------
 

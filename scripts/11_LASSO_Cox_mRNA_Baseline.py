@@ -3,8 +3,10 @@
 
 # 11_LASSO_Cox_mRNA_Baseline.py
 # Task 2: mRNA-only LASSO-Cox baseline for overall survival.
-# Establishes the benchmark C-index that the later integrated (meth + mRNA)
-# model must beat. Uses the shared 5-fold CV splits so all models are comparable.
+# Establishes the benchmark C-index that the integrated (mRNA + methylation) model
+# must beat. Uses the shared 5-fold CV splits so all models are comparable, and the
+# same engine (scikit-survival Coxnet) and nested-CV scheme as the multi-omics model
+# (12) for a clean like-for-like comparison.
 # Run from inside scripts/ (relative paths, like the other Python scripts).
 
 import warnings
@@ -14,9 +16,11 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import KFold
 from sklearn.preprocessing import StandardScaler
-from lifelines import CoxPHFitter
-from lifelines.utils import concordance_index
+from sksurv.util import Surv
+from sksurv.linear_model import CoxnetSurvivalAnalysis
+from sksurv.metrics import concordance_index_censored
 
+warnings.simplefilter("ignore")
 Path("../results/tables").mkdir(parents=True, exist_ok=True)
 
 # --- Load and align ----------------------------------------------------------
@@ -26,63 +30,64 @@ folds = pd.read_csv("../data/processed/cv_fold_assignments.csv").set_index("pati
 
 surv = surv[surv["time"].notna() & (surv["time"] > 0)]
 patients = rna.index.intersection(surv.index).intersection(folds.index)
-rna, surv, folds = rna.loc[patients], surv.loc[patients], folds.loc[patients]
-fold_id = folds["fold"]  # shared 5-fold CV assignment (values 1..5)
+rna, surv = rna.loc[patients], surv.loc[patients]
+fold_id = folds.loc[patients, "fold"]
 print(f"Patients: {len(patients)} | genes: {rna.shape[1]} | folds: {sorted(fold_id.unique())}")
 
-genes = list(rna.columns)
-L1_RATIO = 1.0                            # pure LASSO
-PENALTIES = [0.001, 0.005, 0.01, 0.05]    # inner-CV grid
+L1_RATIO = 1.0
 
 
-def fit_cox(X, T, E, penalizer):
-    """Fit a LASSO-penalized Cox model on a scaled design matrix."""
-    df = X.copy()
-    df["time"], df["event"] = T.values, E.values
-    cph = CoxPHFitter(penalizer=penalizer, l1_ratio=L1_RATIO)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        cph.fit(df, duration_col="time", event_col="event")
-    return cph
+def survival_y(ids):
+    return Surv.from_arrays(event=surv.loc[ids, "event"].astype(bool).values,
+                            time=surv.loc[ids, "time"].values)
 
 
-def c_index(cph, X, T, E):
-    # Higher partial hazard = higher risk; concordance_index wants risk negated.
-    risk = cph.predict_partial_hazard(X)
-    return concordance_index(T, -risk, E)
+def build_features(train_ids, test_ids):
+    """Per-fold standardized expression (fit on training patients only)."""
+    scaler = StandardScaler().fit(rna.loc[train_ids])
+    X_tr = scaler.transform(rna.loc[train_ids])
+    X_te = scaler.transform(rna.loc[test_ids])
+    return X_tr, X_te
+
+
+def select_alpha(X, y, alphas):
+    """Inner 5-fold CV: fit the whole L1 path per inner-train fold and score each
+    alpha on the inner-validation fold; return the alpha with the best mean C-index."""
+    inner = KFold(n_splits=5, shuffle=True, random_state=42)
+    score_sum = np.zeros(len(alphas))
+    for i_tr, i_va in inner.split(X):
+        model = CoxnetSurvivalAnalysis(l1_ratio=L1_RATIO, alphas=alphas, max_iter=100000)
+        try:
+            model.fit(X[i_tr], y[i_tr])
+        except (ArithmeticError, ValueError):  # Coxnet may fail to converge at small alphas
+            continue
+        for j, a in enumerate(alphas):
+            risk = model.predict(X[i_va], alpha=a)
+            score_sum[j] += concordance_index_censored(
+                y[i_va]["event"], y[i_va]["time"], risk)[0]
+    return alphas[int(np.argmax(score_sum))]
 
 
 # --- Nested CV: outer = shared folds, inner = penalty selection ---------------
 rows = []
 for f in sorted(fold_id.unique()):
-    tr, te = fold_id != f, fold_id == f
-    X_tr, X_te = rna[tr], rna[te]
-    T_tr, E_tr = surv.loc[tr, "time"], surv.loc[tr, "event"]
-    T_te, E_te = surv.loc[te, "time"], surv.loc[te, "event"]
+    train_ids = fold_id.index[fold_id != f]
+    test_ids = fold_id.index[fold_id == f]
+    X_tr, X_te = build_features(train_ids, test_ids)
+    y_tr, y_te = survival_y(train_ids), survival_y(test_ids)
 
-    # Scale on training patients only (fold-safe, no leakage).
-    scaler = StandardScaler().fit(X_tr)
-    X_tr_s = pd.DataFrame(scaler.transform(X_tr), index=X_tr.index, columns=genes)
-    X_te_s = pd.DataFrame(scaler.transform(X_te), index=X_te.index, columns=genes)
+    alphas = CoxnetSurvivalAnalysis(l1_ratio=L1_RATIO, n_alphas=50,
+                                    alpha_min_ratio=0.01, max_iter=100000).fit(X_tr, y_tr).alphas_
+    best_alpha = select_alpha(X_tr, y_tr, alphas)
 
-    # Inner 3-fold CV on the training set to pick the penalty.
-    inner = KFold(n_splits=3, shuffle=True, random_state=42)
-    best_pen, best_ci = PENALTIES[0], -np.inf
-    for pen in PENALTIES:
-        scores = []
-        for i_tr, i_va in inner.split(X_tr_s):
-            cph = fit_cox(X_tr_s.iloc[i_tr], T_tr.iloc[i_tr], E_tr.iloc[i_tr], pen)
-            scores.append(c_index(cph, X_tr_s.iloc[i_va], T_tr.iloc[i_va], E_tr.iloc[i_va]))
-        if np.mean(scores) > best_ci:
-            best_ci, best_pen = np.mean(scores), pen
-
-    # Refit on the full outer-train with the chosen penalty, evaluate on outer-test.
-    cph = fit_cox(X_tr_s, T_tr, E_tr, best_pen)
-    ci = c_index(cph, X_te_s, T_te, E_te)
-    n_sel = int((cph.params_.abs() > 1e-6).sum())
-    rows.append({"fold": f, "penalizer": best_pen, "n_features_selected": n_sel,
-                 "test_c_index": ci, "n_test": int(te.sum())})
-    print(f"Fold {f}: C-index={ci:.3f} | penalizer={best_pen} | genes kept={n_sel}")
+    final = CoxnetSurvivalAnalysis(l1_ratio=L1_RATIO, alphas=[best_alpha],
+                                   max_iter=100000).fit(X_tr, y_tr)
+    risk = final.predict(X_te)
+    ci = concordance_index_censored(y_te["event"], y_te["time"], risk)[0]
+    n_sel = int((final.coef_.ravel() != 0).sum())
+    rows.append({"fold": f, "alpha": best_alpha, "n_features_total": X_tr.shape[1],
+                 "n_features_selected": n_sel, "test_c_index": ci, "n_test": len(test_ids)})
+    print(f"Fold {f}: C-index={ci:.3f} | alpha={best_alpha:.4g} | selected={n_sel}")
 
 cv = pd.DataFrame(rows)
 cv.to_csv("../results/tables/lasso_cox_cv_results.csv", index=False)

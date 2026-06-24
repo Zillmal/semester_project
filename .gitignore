@@ -12,3 +12,7 @@ data/processed/*
 # R session files
 .RData
 .Rhistory
+
+# Python
+__pycache__/
+*.pyc
