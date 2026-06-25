@@ -127,6 +127,26 @@ analysis, cross-validation, imputation, and survival modeling.
 
 --------------------------------------------------------------------------------
 
+05b_export_cpg_gene_map.R:
+
+Purpose: Export a CpG -> PAM50 gene mapping for the Python correlation analysis
+
+Loads:
+
+* pam50_features_brca.rds (for the list of selected promoter CpGs)
+* Illumina 450K annotation
+
+Reproduces the stage-04 probe-selection logic restricted to the selected promoter
+CpGs, pairing each CpG with the PAM50 gene(s) whose promoter region it covers
+(TSS1500, TSS200, 1stExon) and converting legacy symbols (CDCA1, KNTC2, ORC6L)
+to current symbols (NUF2, NDC80, ORC6) so methylation and RNA gene names match.
+
+Output:
+
+* cpg_gene_map.csv (one row per CpG-gene pair)
+
+--------------------------------------------------------------------------------
+
 06_week1_eda.ipynb / 06_week1_eda.py:
 
 Purpose: Perform initial exploratory data analysis of the exported PAM50 cohort
@@ -258,6 +278,86 @@ for cross-validated model training or evaluation.
 
 --------------------------------------------------------------------------------
 
+09_CpG_Expression_Correlation.py:
+
+Purpose: Quantify the relationship between promoter methylation and gene
+expression for each PAM50 gene (Task 1).
+
+Loads:
+
+* meth_pam50_knn_imputed.csv (full-cohort imputed methylation, exploratory)
+* rna_pam50.csv
+* cpg_gene_map.csv
+
+For every promoter CpG, computes the Spearman correlation between its imputed beta
+value and the matched gene's log2 expression across patients, with
+Benjamini-Hochberg FDR correction. Aggregates per gene (mean and most-negative
+correlation) and identifies the gene with the strongest silencing signal (most
+negative correlation), which stage 10 reuses to define methylation strata.
+
+Generates:
+
+* cpg_expression_spearman.csv (per-CpG correlations and q-values)
+* gene_methylation_expression_correlation_summary.csv (per-gene summary)
+* methylation_expression_correlation_by_gene.png (per-gene mean-rho bar chart)
+* top_silencing_gene_scatter.png (methylation vs expression for the top CpG)
+
+Note: uses the full-cohort imputed matrix because this is descriptive analysis,
+not cross-validated model evaluation, so no leakage concern applies.
+
+--------------------------------------------------------------------------------
+
+09b_Subtype_Correlation_Comparison.py:
+
+Purpose: Compare the promoter methylation-expression relationship between Luminal A
+and Luminal B (pitch method 3), to test whether methylation-associated gene
+regulation differs between the two subtypes.
+
+Loads:
+
+* meth_pam50_knn_imputed.csv
+* rna_pam50.csv
+* cpg_gene_map.csv
+* labels_luminal_brca.csv
+
+For each PAM50 gene, computes the mean Spearman correlation between promoter
+methylation and expression separately within LumA and within LumB patients, and
+reports the per-gene difference between subtypes.
+
+Generates:
+
+* correlation_by_subtype.csv (per-gene rho in LumA, rho in LumB, difference)
+* methylation_expression_correlation_LumA_vs_LumB.png (per-gene LumA vs LumB
+  scatter; points off the y = x line indicate subtype-specific regulation)
+
+Note: LumB has far fewer patients than LumA, so its per-gene correlations are
+noisier; the comparison is descriptive (no formal test of correlation differences).
+
+--------------------------------------------------------------------------------
+
+10_Survival_Curves.py:
+
+Purpose: Kaplan-Meier overall-survival visualizations (Task 1).
+
+Loads:
+
+* survival_luminal_clean.csv
+* meth_pam50_knn_imputed.csv
+* cpg_gene_map.csv
+* gene_methylation_expression_correlation_summary.csv
+
+Plots overall survival by PAM50 subtype (LumA vs LumB) and by high vs low promoter
+methylation (median split) of the strongest silencing gene from stage 09, each
+with a log-rank test.
+
+Generates:
+
+* km_survival_by_subtype.png
+* km_survival_by_<gene>_methylation.png
+* survival_logrank_tests.csv
+
+--------------------------------------------------------------------------------
+
 11_LASSO_Cox_mRNA_Baseline.py:
 
 Purpose: Establish the mRNA-only LASSO-Cox survival benchmark (Task 2).
@@ -288,16 +388,19 @@ Output:
 
 How to run:
 
-Run the scripts in numerical order (01 -> 02 -> 03 -> 04 -> 05) from the repository
-root. Script 01 downloads the raw TCGA data (several GB) and only needs to run
-once. The data/ folder is git-ignored, so the .rds files stay local and are not
-pushed to the repository.
+Run the scripts in numerical order (01 -> 02 -> 03 -> 04 -> 05 -> 05b) from the
+repository root. Script 01 downloads the raw TCGA data (several GB) and only needs
+to run once. Script 05b exports the CpG -> gene map used by the correlation
+analysis. The data/ folder is git-ignored, so the .rds files stay local and are
+not pushed to the repository.
 
 After exporting the data, run the Python notebooks/scripts:
 
 06_Week1_EDA.ipynb / 06_Week1_EDA.py -> 07_Create_CV_Folds.ipynb /
 07_Create_CV_Folds.py -> 08_Methylation_KNN_Imputation_For_Plotting.ipynb /
-08_methylation_knn_imputation_For_Plotting.py
+08_methylation_knn_imputation_For_Plotting.py ->
+09_CpG_Expression_Correlation.py -> 09b_Subtype_Correlation_Comparison.py ->
+10_Survival_Curves.py
 
 For the mRNA-only survival benchmark, run 11_LASSO_Cox_mRNA_Baseline.py once the
 data export (05) and CV folds (07) are available.

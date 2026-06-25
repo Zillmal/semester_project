@@ -1,0 +1,3 @@
+comparison,group1,n1,group2,n2,logrank_chisq,p_value
+Overall survival by PAM50 subtype,LumA,416,LumB,140,7.814644284544318,0.005182454762741924
+Overall survival by ESR1 promoter methylation,Low methylation,278,High methylation,278,2.2987346879338237,0.12947943807918239
