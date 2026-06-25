@@ -358,6 +358,33 @@ Generates:
 
 --------------------------------------------------------------------------------
 
+11_LASSO_Cox_mRNA_Baseline.py:
+
+Purpose: Establish the mRNA-only LASSO-Cox survival benchmark (Task 2).
+
+Loads:
+
+* rna_pam50.csv
+* survival_luminal_clean.csv
+* cv_fold_assignments.csv
+
+Fits a LASSO-penalized Cox proportional-hazards model on the log2-normalized PAM50
+mRNA features using the shared 5-fold CV splits. The model uses scikit-survival's
+Coxnet (the same engine and nested-CV scheme as the multi-omics model 12, so the two
+LASSO C-indices are directly comparable). Nested cross-validation is used: the outer
+loop is the shared fold assignment, while an inner 5-fold loop selects the L1 penalty.
+Feature scaling and penalty selection are fit on the training patients of each fold
+only, so there is no leakage. Reports the per-fold concordance index (C-index) and
+the mean +/- sd benchmark that the integrated methylation + mRNA model must beat.
+
+Requires scikit-survival (pip install scikit-survival).
+
+Output:
+
+* lasso_cox_cv_results.csv (per-fold alpha, number of genes selected, test C-index)
+
+--------------------------------------------------------------------------------
+
 
 How to run:
 
@@ -374,6 +401,9 @@ After exporting the data, run the Python notebooks/scripts:
 08_methylation_knn_imputation_For_Plotting.py ->
 09_CpG_Expression_Correlation.py -> 09b_Subtype_Correlation_Comparison.py ->
 10_Survival_Curves.py
+
+For the mRNA-only survival benchmark, run 11_LASSO_Cox_mRNA_Baseline.py once the
+data export (05) and CV folds (07) are available.
 
 For later cross-validated survival models, use KNN_Imputation_Helper_Function.py so that imputation and scaling are fit separately within each training fold.
 
