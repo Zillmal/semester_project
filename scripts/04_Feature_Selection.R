@@ -31,7 +31,7 @@ library(IlluminaHumanMethylation450kanno.ilmn12.hg19)
 
 # Load Multiomics Data ---------------------------------------------------------
 
-multiomics <- readRDS("data/multiomics/multiomics_luminal_brca.rds")
+multiomics <- readRDS("../data/multiomics/multiomics_luminal_brca.rds")
 
 beta            <- multiomics$beta   # CpG x samples, raw beta values
 rna_mat         <- multiomics$rna    # gene x samples, raw STAR counts
@@ -121,7 +121,7 @@ cpg_annotation_summary <- ann450k[promoter_probes, c(
 
 write.csv(
   cpg_annotation_summary,
-  "data/multiomics/cpg_annotation_summary_pam50_promoters.csv",
+  "../data/multiomics/cpg_annotation_summary_pam50_promoters.csv",
   row.names = FALSE
 )
 
@@ -150,4 +150,4 @@ pam50_features <- list(
   y        = y
 )
 
-saveRDS(pam50_features, "data/multiomics/pam50_features_brca.rds")
+saveRDS(pam50_features, "../data/multiomics/pam50_features_brca.rds")

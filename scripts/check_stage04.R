@@ -2,7 +2,7 @@
 # Run from the repository root after 01 -> 02 -> 04. Verifies structure,
 # sample alignment, value ranges and subtype counts of the PAM50 feature object.
 
-f <- readRDS("data/multiomics/pam50_features_brca.rds")
+f <- readRDS("../data/multiomics/pam50_features_brca.rds")
 
 rna  <- f$rna
 meth <- f$meth

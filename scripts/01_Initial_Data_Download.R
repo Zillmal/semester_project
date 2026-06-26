@@ -26,8 +26,8 @@ library(SummarizedExperiment)
 # Create Directories -----------------------------------------------------------
 
 dirs <- c(
-  "data/raw",
-  "data/multiomics")
+  "../data/raw",
+  "../data/multiomics")
 
 for (d in dirs) {
   if (!dir.exists(d)) {
@@ -71,6 +71,6 @@ clinical <- GDCquery_clinic("TCGA-BRCA", type = "clinical")
 
 # Save data to accelerate reloading data ---------------------------------------
 
-saveRDS(meth, "data/raw/meth_tcga_brca.rds")
-saveRDS(rna, "data/raw/rna_tcga_brca.rds")
-saveRDS(clinical, "data/raw/clinical_brca.rds")
+saveRDS(meth, "../data/raw/meth_tcga_brca.rds")
+saveRDS(rna, "../data/raw/rna_tcga_brca.rds")
+saveRDS(clinical, "../data/raw/clinical_brca.rds")

@@ -12,11 +12,11 @@ library(glue)
 
 # Load Prepared Data -----------------------------------------------------------
 
-meth <- readRDS("data/raw/meth_tcga_brca.rds")
+meth <- readRDS("../data/raw/meth_tcga_brca.rds")
 
-rna <- readRDS("data/raw/rna_tcga_brca.rds")
+rna <- readRDS("../data/raw/rna_tcga_brca.rds")
 
-clinical <- readRDS("data/raw/clinical_brca.rds")
+clinical <- readRDS("../data/raw/clinical_brca.rds")
 
 
 # 01. Reduce the data to Luminal A and Lumnial B Subtypes ----------------------
@@ -171,5 +171,5 @@ multiomics <- list(
   y = y
 )
 
-saveRDS(multiomics, "data/multiomics/multiomics_luminal_brca.rds")
+saveRDS(multiomics, "../data/multiomics/multiomics_luminal_brca.rds")
 

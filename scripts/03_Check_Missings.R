@@ -5,7 +5,7 @@ rm(list = ls())
 
 # Load Multiomics Data ---------------------------------------------------------
 
-multiomics <- readRDS("data/multiomics/multiomics_luminal_brca.rds")
+multiomics <- readRDS("../data/multiomics/multiomics_luminal_brca.rds")
 
 beta <- multiomics$beta
 
