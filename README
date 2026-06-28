@@ -418,6 +418,25 @@ Output:
 
 --------------------------------------------------------------------------------
 
+13_LASSO_Cox_Model_Comparison.py:
+
+Creates a quick evaluation of the results tables from the baseline and the integrated
+LASSO Cox Model. Also saves 3 figues in results/figures for visualization of the results.
+Also a equivalent Notebook was created in notebooks/ for exploration. 
+
+Input:
+
+* lasso_cox_cv_results
+* lasso_cox_multiomics_cv_results
+
+Output:
+
+* cindex_boxplot.png
+* cindex_mean_sd.png
+* feature_selection_comparison.png
+
+--------------------------------------------------------------------------------
+
 How to run:
 
 Run the scripts in numerical order (01 -> 02 -> 03 -> 04 -> 05 -> 05b) from the
@@ -433,6 +452,9 @@ After exporting the data, run the Python notebooks/scripts:
 08_methylation_knn_imputation_For_Plotting.py ->
 09_CpG_Expression_Correlation.py -> 09b_Subtype_Correlation_Comparison.py ->
 10_Survival_Curves.py
+11_LASSO_Cox_mRNA_Baseline.py
+12_LASSO_Cox_Multiomics.py
+13_LASSO_Cox_Model_Comparison.py
 
 For the mRNA-only survival benchmark, run 11_LASSO_Cox_mRNA_Baseline.py once the
 data export (05) and CV folds (07) are available.
