@@ -258,7 +258,13 @@ for f in sorted(fold_id.unique()):
                  "n_features_selected": n_sel, "train_c_index": train_ci, "test_c_index": ci, "n_test": len(test_ids)})
     print(f"Fold {f}: Train C-index={train_ci:.3f} | Test C-index={ci:.3f} | alpha={used_alpha:.4g} | "
           f"features={X_tr.shape[1]} | selected={n_sel}")
-
+    
+    # Save risk scores
+    risk_rows = [{"patient": pid, "fold": f, "risk_score": float(r)}
+             for pid, r in zip(test_ids, risk)]
+    risk_path = Path("../results/tables/lasso_cox_multiomics_risk_scores.csv")
+    pd.DataFrame(risk_rows).to_csv(risk_path, mode="a", header=not risk_path.exists(), index=False)
+    
 cv = pd.DataFrame(rows)
 cv.to_csv("../results/tables/lasso_cox_multiomics_cv_results.csv", index=False)
 

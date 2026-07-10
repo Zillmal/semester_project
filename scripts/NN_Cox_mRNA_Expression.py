@@ -159,6 +159,14 @@ def run_cv(learning_rate,
         test_c_index = c_index(model, x_te, durations_te, events_te)
 
         epochs_trained = log.epoch + 1          
+
+        # Save risk scores
+        risk_scores = model.predict(x_te).ravel()
+        risk_path = Path("../results/tables/nn_mrna_only_risk_scores.csv")
+        pd.DataFrame([{"patient": pid, "fold": f, "risk_score": float(r)}
+              for pid, r in zip(test_ids, risk_scores)]).to_csv(
+        risk_path, mode="a", header=not risk_path.exists(), index=False)
+        
         rows.append({"fold": f, 
                      "n_test": len(test_ids),
                      "epochs_trained": epochs_trained, 
