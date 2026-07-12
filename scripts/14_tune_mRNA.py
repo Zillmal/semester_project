@@ -20,8 +20,6 @@ def summarize_cv(cv, config, config_id, stage):
         "sd_train_c_index": cv["train_c_index"].std(),
         "mean_val_c_index": cv["val_c_index"].mean(),
         "sd_val_c_index": cv["val_c_index"].std(),
-        "mean_test_c_index": cv["test_c_index"].mean(),
-        "sd_test_c_index": cv["test_c_index"].std(),
         "mean_epochs_trained": cv["epochs_trained"].mean(),
     }
 
@@ -76,7 +74,7 @@ def run_tuning(grid, param_names):
         print(f"\n[{stage_name}] Running config {config_id}/{len(grid)}")
         print(config)
 
-        cv = run_cv(**config)
+        cv = run_cv(**config, evaluate_on_test=False)
 
         cv = cv.copy()
         cv["stage"] = stage_name

@@ -18,6 +18,7 @@ BEST_CONFIG = {
     "batch_norm": False,
     "patience": 10,
     "batch_size": 32,
+    "evaluate_on_test": True
 }
 
 def summarize_cv(cv, config):

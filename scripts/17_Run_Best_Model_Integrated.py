@@ -21,6 +21,7 @@ BEST_CONFIG = {
     "meth_variance_threshold": 0.0005,
     "patience": 10,
     "batch_size": 32,
+    "evaluate_on_test": True
 }
 
 
