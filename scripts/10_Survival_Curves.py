@@ -30,25 +30,104 @@ surv["time_years"] = surv["time"] / 365.25
 
 
 def two_group_km(df, group_col, title, fname, order):
+    TEXT_SIZE = 19
     """KM curves for two groups + log-rank test; returns a result row."""
+    BLUE = "#0e5f60"
+    PINK = "#9c224d"
+    BG = "#fcfcfc"
+    
     g0, g1 = order
     a, b = df[df[group_col] == g0], df[df[group_col] == g1]
     lr = logrank_test(a["time_years"], b["time_years"],
                       event_observed_A=a["event"], event_observed_B=b["event"])
+    
+    fig, ax = plt.subplots(
+        figsize=(7, 5.5),
+        facecolor=BG
+    )
+    ax.set_facecolor(BG)
 
     kmf = KaplanMeierFitter()
-    plt.figure(figsize=(7, 5))
-    ax = plt.gca()
-    for g, sub in [(g0, a), (g1, b)]:
-        kmf.fit(sub["time_years"], sub["event"], label=f"{g} (n={len(sub)})")
-        kmf.plot_survival_function(ax=ax, ci_show=True)
-    ax.set_xlabel("Overall survival (years)")
-    ax.set_ylabel("Survival probability")
+
+    group_settings = [
+        (g0, a, "Luminal A", BLUE),
+        (g1, b, "Luminal B", PINK)
+    ]
+
+    group_settings = [
+        (g0, a, "Luminal A", BLUE),
+        (g1, b, "Luminal B", PINK)
+    ]
+
+    for group, sub, display_name, color in group_settings:
+        kmf.fit(
+            durations=sub["time_years"],
+            event_observed=sub["event"],
+            label=f"{display_name} (n={len(sub)})"
+        )
+
+        kmf.plot_survival_function(
+            ax=ax,
+            ci_show=True,
+            color=color,
+            linewidth=2.5,
+            show_censors=False,
+            ci_alpha=0.1
+        )
+
+    ax.set_title(
+        title,
+        fontsize=TEXT_SIZE,
+        pad=12
+    )
+
+    ax.set_xlabel(
+        "Time since diagnosis (years)",
+        fontsize=TEXT_SIZE
+    )
+
+    ax.set_ylabel(
+        "Survival probability",
+        fontsize=TEXT_SIZE
+    )
+
     ax.set_ylim(0, 1.02)
-    ax.set_title(f"{title}\nlog-rank p = {lr.p_value:.3g}")
+    ax.set_xlim(left=0)
+
+    # Log-rank p-value annotation
+    if lr.p_value < 0.0001:
+        p_text = r"Log-rank $p < 0.0001$"
+    else:
+        p_text = rf"Log-rank $p = {lr.p_value:.3g}$"
+
+    ax.text(
+        0.04,
+        0.05,
+        p_text,
+        transform=ax.transAxes,
+        fontsize=TEXT_SIZE*0.8,
+        style="italic"
+    )
+
+    ax.legend(
+        loc="upper right",
+        frameon=False,
+        fontsize=TEXT_SIZE*0.8,
+        handlelength=1.5
+    )
+
+    # Minimal styling
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    ax.tick_params(
+        axis="both",
+        labelsize=TEXT_SIZE*0.8
+    )
+
     plt.tight_layout()
-    plt.savefig(f"../results/figures/{fname}", dpi=300)
-    plt.close()
+    plt.savefig(f"../results/figures/{fname}", dpi=300, facecolor=BG, bbox_inches="tight")
+    plt.close(fig)
 
     return {"comparison": title, "group1": g0, "n1": len(a),
             "group2": g1, "n2": len(b),
