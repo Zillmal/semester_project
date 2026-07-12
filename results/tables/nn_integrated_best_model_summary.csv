@@ -1,2 +1,2 @@
-learning_rate,weight_decay,num_nodes,dropout,batch_norm,meth_variance_threshold,patience,batch_size,mean_train_c_index,sd_train_c_index,mean_val_c_index,sd_val_c_index,mean_test_c_index,sd_test_c_index,mean_epochs_trained
-0.001,0.03,[8],0.5,False,0.0005,10,32,0.6470685132341079,0.11389144225310296,0.5634209952405962,0.1718038646866778,0.6396254891570562,0.19477747988063576,12.0
+learning_rate,weight_decay,num_nodes,dropout,batch_norm,meth_variance_threshold,patience,batch_size,evaluate_on_test,mean_train_c_index,sd_train_c_index,mean_val_c_index,sd_val_c_index,mean_test_c_index,sd_test_c_index,mean_epochs_trained
+0.001,0.03,[8],0.5,False,0.0005,10,32,True,0.6470685132341079,0.11389144225310296,0.5634209952405962,0.1718038646866778,0.6396254891570562,0.19477747988063576,12.0

@@ -114,7 +114,8 @@ def run_cv(learning_rate,
            dropout, 
            batch_norm,
            patience, 
-           batch_size):
+           batch_size,
+           evaluate_on_test=False):
     
     rows = []
 
@@ -156,16 +157,20 @@ def run_cv(learning_rate,
         # Evaluate on the held-out test fold with C-index.
         train_c_index = c_index(model, x_tr, durations_tr, events_tr)
         val_c_index = c_index(model, x_val, durations_val, events_val)
-        test_c_index = c_index(model, x_te, durations_te, events_te)
+        if evaluate_on_test:
+            test_c_index = c_index(model, x_te, durations_te, events_te)
+        else:
+            test_c_index = np.nan
 
         epochs_trained = log.epoch + 1          
 
         # Save risk scores
-        risk_scores = model.predict(x_te).ravel()
-        risk_path = Path("../results/tables/nn_mrna_only_risk_scores.csv")
-        pd.DataFrame([{"patient": pid, "fold": f, "risk_score": float(r)}
-              for pid, r in zip(test_ids, risk_scores)]).to_csv(
-        risk_path, mode="a", header=not risk_path.exists(), index=False)
+        if evaluate_on_test:
+            risk_scores = model.predict(x_te).ravel()
+            risk_path = Path("../results/tables/nn_mrna_only_risk_scores.csv")
+            pd.DataFrame([{"patient": pid, "fold": f, "risk_score": float(r)}
+                for pid, r in zip(test_ids, risk_scores)]).to_csv(
+            risk_path, mode="a", header=not risk_path.exists(), index=False)
         
         rows.append({"fold": f, 
                      "n_test": len(test_ids),
@@ -196,8 +201,13 @@ def summarize_cv_results(cv):
 
     print(f"\nMean C-index of NN-Cox mRNA Expression only across 5 folds:\n"
           f"Train: {train_mean:.3f} +/- {train_sd:.3f}\n"
-          f"Val:   {val_mean:.3f} +/- {val_sd:.3f}\n"
-          f"Test:  {test_mean:.3f} +/- {test_sd:.3f} (5-fold CV)")
+          f"Val:   {val_mean:.3f} +/- {val_sd:.3f}")
+    if "test_c_index" in cv.columns and cv["test_c_index"].notna().any():
+        test_mean_ci = cv["test_c_index"].mean()
+        test_sd_ci = cv["test_c_index"].std()
+        print(f"Test:  {test_mean_ci:.3f} +/- {test_sd_ci:.3f}")
+    else:
+        print("Test: not evaluated")
     
 def save_cv_results(cv, filename="nn_cox_mrna_cv_results.csv"):
     out_dir = Path("../results/tables")
@@ -215,7 +225,8 @@ if __name__ == "__main__":
         "dropout": 0.4,
         "batch_norm": True,
         "patience": 15,
-        "batch_size": 64
+        "batch_size": 64,
+        "evaluate_on_test": True
     }
 
     cv = run_cv(**config)
