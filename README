@@ -625,6 +625,98 @@ Outputs:
 
 --------------------------------------------------------------------------------
 
+
+19a_LASSO_Feature_Importance.ipynb
+19a_LASSO_Feature_Importance.py
+
+Feature-importance rankings for the two LASSO-Cox models (mRNA-only and multi-omics). 
+Because a single fold's feature selection is unstable (1-294 features), the 5-fold CV is repeated 
+with 5 seeds (5 x 5 = 25 fits per model, freshly stratified partitions, 1-SE alpha) and aggregated per feature: 
+importance (mean |coef|) and selection_frequency (fraction of fits in which the feature was selected).
+
+Input: 
+
+* data/processed/ (rna_pam50, meth_pam50, survival, cpg_gene_map).
+
+Output:
+
+* feature_importance_lasso_mrna.csv
+* feature_importance_lasso_multiomics.csv
+* feature_importance_lasso_multiomics_gene_level.csv
+* lasso_selection_count_per_run.csv + figures
+
+
+--------------------------------------------------------------------------------
+
+19b_NN_SHAP_Feature_Importance.ipynb
+19b_NN_SHAP_Feature_Importance.py
+
+
+
+SHAP feature importance for the two DeepSurv networks (mRNA-only and integrated), 
+using the best configurations from the tuning stage (scripts 16/17). As in 19a, results are averaged 
+over 5 seeds x 5 folds = 25 runs (the seed controls both the fold partition and the network weight initialization); 
+each run computes SHAP (DeepExplainer) on the test fold and the mean |SHAP| per feature is aggregated.
+
+Input: 
+
+* data/processed/. Also requires the shap package.
+
+Output: 
+
+* feature_importance_nn_mrna.csv 
+* feature_importance_nn_integrated.csv  
+* feature_importance_nn_integrated_gene_level.csv + figures
+
+
+--------------------------------------------------------------------------------
+
+
+20_Feature_Importance_Overview.ipynb
+20_Feature_Importance_Overview.py
+
+Overview of the four model rankings plus a simple cross-model comparison. 
+Shows each model's top features as a table and bar chart (for the LASSO models also the selection frequency) 
+and a consistency counter: in how many of the 4 models a gene appears in the top K (stacked bar, colored by model).
+No score merging, since the raw values are not comparable across models.
+
+
+Input: 
+
+* the four feature_importance_*.csv from 19a/19b.
+
+
+Output:
+
+* feature_importance_overview_top15.csv 
+* feature_importance_topK_recurrence.csv + figures.
+
+
+--------------------------------------------------------------------------------
+
+
+20b_Gene_Modality_Matrix.ipynb
+20b_Gene_Modality_Matrix.py
+
+As suggested by our supervisor:
+A single table: 50 PAM50 genes as rows, with two columns per model (expression / methylation) = 8 columns. 
+Each cell is the gene's percentile rank among the 50 genes (this solves the saturation, since ranking is done 
+among genes rather than among hundreds of CpG features). The 4-vs-2-model asymmetry is corrected by averaging 
+within each modality (expression_mean over 4, methylation_mean over 2), then combined = expression_mean + methylation_mean, 
+followed by ranking.
+
+
+Input: 
+
+* the four feature_importance_*.csv from 19a/19b.
+
+
+Output:
+
+* gene_modality_matrix.csv + stacked top-15 figure.
+
+--------------------------------------------------------------------------------
+
 How to run:
 
 Run the R scripts in numerical order (01 -> 02 -> 03 -> 04 -> 05 -> 05b) from the
