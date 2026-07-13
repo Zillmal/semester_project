@@ -203,6 +203,10 @@ def fit_final_model_with_fallback(X_tr, y_tr, selected_alpha, alphas):
 
 rows = []
 path_models = {}
+# reset risk-score file once per run to avoid duplicate-fold appends
+risk_path = Path("../results/tables/lasso_cox_mrna_risk_scores.csv")
+risk_path.unlink(missing_ok=True)
+
 for f in sorted(fold_id.unique()):
     train_ids = fold_id.index[fold_id != f]
     test_ids = fold_id.index[fold_id == f]

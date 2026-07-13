@@ -232,6 +232,10 @@ rows = []
 path_models = {}
 feature_names_by_fold = {}
 
+# reset risk-score file once per run to avoid duplicate-fold appends
+risk_path = Path("../results/tables/lasso_cox_multiomics_risk_scores.csv")
+risk_path.unlink(missing_ok=True)
+
 for f in sorted(fold_id.unique()):
     train_ids = fold_id.index[fold_id != f]
     test_ids = fold_id.index[fold_id == f]
