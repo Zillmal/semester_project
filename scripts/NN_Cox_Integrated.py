@@ -214,6 +214,11 @@ def run_cv(
     
     rows = []
 
+    # reset risk-score file once per run to avoid duplicate-fold appends
+    risk_path = Path("../results/tables/nn_integrated_risk_scores.csv")
+    if evaluate_on_test:
+        risk_path.unlink(missing_ok=True)
+
     for f in sorted(fold_id.unique()):
         # Outer split: test set.
         train_val_ids = fold_id.index[fold_id != f]
