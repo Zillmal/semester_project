@@ -1,0 +1,5 @@
+comparison,model_1,model_2,statistic,p_value,significant
+Does methylation help in LASSO?,mRNA-only LASSO,Multi-omics LASSO,7.0,1.0,no
+Does methylation help in NN?,mRNA-only NN,Multi-omics NN,6.0,0.8125,no
+Does NN beat LASSO on RNA only?,mRNA-only LASSO,mRNA-only NN,3.0,0.3125,no
+Does NN beat LASSO with both omics?,Multi-omics LASSO,Multi-omics NN,3.0,0.3125,no

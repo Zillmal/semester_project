@@ -1,0 +1,5 @@
+model,logrank_p,n_high,n_low
+mRNA-only LASSO Cox,0.1632,278,278
+Multi-omics LASSO Cox,0.597,278,278
+mRNA-only Neural Network,0.0017,278,278
+Multi-omics Neural Network,0.1368,278,278

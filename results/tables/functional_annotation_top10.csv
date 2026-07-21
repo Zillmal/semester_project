@@ -1,0 +1,11 @@
+gene,rank,combined,functional_group,mean_rho,min_rho,min_rho_cpg,role
+KRT5,1,1.59,Basal / myoepithelial,0.02,-0.08,cg23645091,Basal keratin
+SFRP1,2,1.36,Basal / myoepithelial,-0.08,-0.35,cg24319902,Wnt antagonist - often methylation-silenced
+MAPT,3,1.32,ER / luminal signaling,-0.19,-0.3,cg05301556,Tau - ER-associated (tamoxifen)
+ESR1,4,1.28,ER / luminal signaling,-0.42,-0.59,cg15543523,Estrogen receptor - luminal identity
+MYC,5,1.26,Proliferation / cell cycle,0.01,-0.16,cg10832291,MYC oncogene - proliferation
+NUF2,6,1.25,Proliferation / cell cycle,-0.02,-0.17,cg26029744,Kinetochore - mitosis
+MLPH,7,1.25,ER / luminal signaling,-0.14,-0.35,cg14070755,Melanophilin - luminal marker
+CDC6,8,1.21,Proliferation / cell cycle,-0.15,-0.3,cg20725670,Replication licensing
+ERBB2,9,1.2,HER2,-0.13,-0.41,cg15227682,HER2 receptor - 17q12 amplicon
+CENPF,10,1.18,Proliferation / cell cycle,-0.04,-0.18,cg09065776,Centromere protein - mitosis
