@@ -23,9 +23,10 @@
 
 
 import sys
-sys.path.append("../scripts")  
-import warnings
 from pathlib import Path
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.append(PROJECT_ROOT / "scripts")  
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -38,8 +39,7 @@ from sksurv.metrics import concordance_index_censored
 from KNN_Imputation_Helper_Function import fit_transform_train_test_methylation
 
 warnings.simplefilter("ignore")
-Path("../results/tables").mkdir(parents=True, exist_ok=True)
-
+Path(PROJECT_ROOT / "results" / "tables").mkdir(parents=True, exist_ok=True)
 
 # ## Load and align data
 # 
@@ -59,11 +59,11 @@ Path("../results/tables").mkdir(parents=True, exist_ok=True)
 # In[33]:
 
 
-rna = pd.read_csv("../data/processed/rna_pam50.csv").set_index("patient")
-meth = pd.read_csv("../data/processed/meth_pam50.csv").set_index("patient")
-surv = pd.read_csv("../data/processed/survival_luminal_clean.csv").set_index("patient")
-folds = pd.read_csv("../data/processed/cv_fold_assignments.csv").set_index("patient")
-anno = pd.read_csv("../data/processed/cpg_gene_map.csv")
+rna = pd.read_csv(PROJECT_ROOT / "data" / "processed" / "rna_pam50.csv").set_index("patient")
+meth = pd.read_csv(PROJECT_ROOT / "data" / "processed" / "meth_pam50.csv").set_index("patient")
+surv = pd.read_csv(PROJECT_ROOT / "data" / "processed" / "survival_luminal_clean.csv").set_index("patient")
+folds = pd.read_csv(PROJECT_ROOT / "data" / "processed" / "cv_fold_assignments.csv").set_index("patient")
+anno = pd.read_csv(PROJECT_ROOT / "data" / "processed" / "cpg_gene_map.csv")
 
 cpg_to_gene = dict(zip(anno["cpg"], anno["gene"]))
 surv = surv[surv["time"].notna() & (surv["time"] > 0)]
@@ -233,7 +233,7 @@ path_models = {}
 feature_names_by_fold = {}
 
 # reset risk-score file once per run to avoid duplicate-fold appends
-risk_path = Path("../results/tables/lasso_cox_multiomics_risk_scores.csv")
+risk_path = PROJECT_ROOT / "results" / "tables" / "lasso_cox_multiomics_risk_scores.csv"
 risk_path.unlink(missing_ok=True)
 
 for f in sorted(fold_id.unique()):
@@ -266,12 +266,11 @@ for f in sorted(fold_id.unique()):
     # Save risk scores
     risk_rows = [{"patient": pid, "fold": f, "risk_score": float(r)}
              for pid, r in zip(test_ids, risk)]
-    risk_path = Path("../results/tables/lasso_cox_multiomics_risk_scores.csv")
+    risk_path = PROJECT_ROOT / "results" / "tables" / "lasso_cox_multiomics_risk_scores.csv"
     pd.DataFrame(risk_rows).to_csv(risk_path, mode="a", header=not risk_path.exists(), index=False)
     
 cv = pd.DataFrame(rows)
-cv.to_csv("../results/tables/lasso_cox_multiomics_cv_results.csv", index=False)
-
+cv.to_csv(PROJECT_ROOT / "results" / "tables" / "lasso_cox_multiomics_cv_results.csv", index=False)
 best_fold = cv.loc[cv["test_c_index"].idxmax(), "fold"]
 path_model = path_models[best_fold]
 
@@ -304,12 +303,7 @@ plt.ylabel("Coefficient")
 plt.title(f"LASSO-Cox Coefficient Paths (mRNA + Methylation, Best Fold = {best_fold})")
 plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
 plt.tight_layout()
-plt.savefig("../results/figures/lasso_cox_multiomics_coefficient_paths.png", dpi=300)
-plt.show()
-
-
-# In[ ]:
-
-
+plt.savefig(PROJECT_ROOT / "results" / "figures" / "lasso_cox_multiomics_coefficient_paths.png", dpi=300)
+#plt.show()
 
 

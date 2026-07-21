@@ -13,12 +13,14 @@ from sksurv.util import Surv
 from sksurv.linear_model import CoxnetSurvivalAnalysis
 from sksurv.metrics import concordance_index_censored
 
-sys.path.append("../scripts") 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+sys.path.append(str(PROJECT_ROOT / "scripts")) 
 from KNN_Imputation_Helper_Function import fit_transform_train_test_methylation
 
 warnings.simplefilter("ignore") 
-TABLES = Path("../results/tables"); TABLES.mkdir(parents=True, exist_ok=True)
-FIGURES = Path("../results/figures"); FIGURES.mkdir(parents=True, exist_ok=True)
+TABLES = PROJECT_ROOT / "results" / "tables"; TABLES.mkdir(parents=True, exist_ok=True)
+FIGURES = PROJECT_ROOT / "results" / "figures"; FIGURES.mkdir(parents=True, exist_ok=True)
 
 RANDOM_STATE = 42        # inner-CV (alpha) seed
 N_SEEDS = 5              # number of repeated outer CVs
@@ -27,10 +29,10 @@ SEEDS = list(range(N_SEEDS))
 
 # Load and align data
 
-rna   = pd.read_csv("../data/processed/rna_pam50.csv").set_index("patient")
-meth  = pd.read_csv("../data/processed/meth_pam50.csv").set_index("patient")
-surv  = pd.read_csv("../data/processed/survival_luminal_clean.csv").set_index("patient")
-anno  = pd.read_csv("../data/processed/cpg_gene_map.csv")
+rna   = pd.read_csv(PROJECT_ROOT / "data" / "processed" / "rna_pam50.csv").set_index("patient")
+meth  = pd.read_csv(PROJECT_ROOT / "data" / "processed" / "meth_pam50.csv").set_index("patient")
+surv  = pd.read_csv(PROJECT_ROOT / "data" / "processed" / "survival_luminal_clean.csv").set_index("patient")
+anno  = pd.read_csv(PROJECT_ROOT / "data" / "processed" / "cpg_gene_map.csv")
 cpg_to_gene = dict(zip(anno["cpg"], anno["gene"]))
 
 surv = surv[surv["time"].notna() & (surv["time"] > 0)]

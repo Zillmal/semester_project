@@ -15,14 +15,16 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.stats import spearmanr
 
-Path("../results/figures").mkdir(parents=True, exist_ok=True)
-Path("../results/tables").mkdir(parents=True, exist_ok=True)
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+Path(PROJECT_ROOT / "results" / "figures").mkdir(parents=True, exist_ok=True)
+Path(PROJECT_ROOT / "results" / "tables").mkdir(parents=True, exist_ok=True)
 
 # --- Load and align ----------------------------------------------------------
-meth = pd.read_csv("../data/processed/meth_pam50_knn_imputed.csv", index_col=0)
-rna = pd.read_csv("../data/processed/rna_pam50.csv").set_index("patient")
-cpg_gene = pd.read_csv("../data/processed/cpg_gene_map.csv")
-labels = pd.read_csv("../data/processed/labels_luminal_brca.csv").set_index("patient")
+meth = pd.read_csv(PROJECT_ROOT / "data" / "processed" / "meth_pam50_knn_imputed.csv", index_col=0)
+rna = pd.read_csv(PROJECT_ROOT / "data" / "processed" / "rna_pam50.csv").set_index("patient")
+cpg_gene = pd.read_csv(PROJECT_ROOT / "data" / "processed" / "cpg_gene_map.csv")
+labels = pd.read_csv(PROJECT_ROOT / "data" / "processed" / "labels_luminal_brca.csv").set_index("patient")
 
 patients = meth.index.intersection(rna.index).intersection(labels.index)
 meth, rna, labels = meth.loc[patients], rna.loc[patients], labels.loc[patients]
@@ -48,7 +50,7 @@ comp = pd.DataFrame({"rho_LumA": per_gene_mean_rho(luma_ids),
 comp["difference"] = comp["rho_LumB"] - comp["rho_LumA"]   # +ve: weaker silencing in LumB
 comp = comp.dropna().sort_values("rho_LumA")
 comp.index.name = "gene"
-comp.to_csv("../results/tables/correlation_by_subtype.csv")
+comp.to_csv(PROJECT_ROOT / "results" / "tables" / "correlation_by_subtype.csv")
 
 print("\nGenes differing most between subtypes:")
 print(comp.reindex(comp["difference"].abs().sort_values(ascending=False).index).head(8).round(3))
@@ -72,6 +74,6 @@ plt.xlabel("Mean Spearman rho (Luminal A)")
 plt.ylabel("Mean Spearman rho (Luminal B)")
 plt.title("Methylation-Expression Correlation per PAM50 Gene: LumA vs LumB")
 plt.tight_layout()
-plt.savefig("../results/figures/methylation_expression_correlation_LumA_vs_LumB.png", dpi=300)
+plt.savefig(PROJECT_ROOT / "results" / "figures" / "methylation_expression_correlation_LumA_vs_LumB.png", dpi=300)
 plt.close()
 print("\nSaved correlation_by_subtype.csv and methylation_expression_correlation_LumA_vs_LumB.png")

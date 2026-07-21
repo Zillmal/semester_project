@@ -20,9 +20,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.stats import spearmanr
 
-Path("../results/figures").mkdir(parents=True, exist_ok=True)
-Path("../results/tables").mkdir(parents=True, exist_ok=True)
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
+Path(PROJECT_ROOT / "results" / "figures").mkdir(parents=True, exist_ok=True)
+Path(PROJECT_ROOT / "results" / "tables").mkdir(parents=True, exist_ok=True)
 
 # ## Load data
 # 
@@ -37,9 +38,9 @@ Path("../results/tables").mkdir(parents=True, exist_ok=True)
 # In[17]:
 
 
-meth = pd.read_csv("../data/processed/meth_pam50_knn_imputed.csv", index_col=0)
-rna = pd.read_csv("../data/processed/rna_pam50.csv").set_index("patient")
-cpg_gene = pd.read_csv("../data/processed/cpg_gene_map.csv")
+meth = pd.read_csv(PROJECT_ROOT / "data" / "processed" / "meth_pam50_knn_imputed.csv", index_col=0)
+rna = pd.read_csv(PROJECT_ROOT / "data" / "processed" / "rna_pam50.csv").set_index("patient")
+cpg_gene = pd.read_csv(PROJECT_ROOT / "data" / "processed" / "cpg_gene_map.csv")
 
 assert meth.isna().sum().sum() == 0, "Imputed methylation still contains NaNs."
 
@@ -107,9 +108,9 @@ for _, (cpg, gene) in cpg_gene[["cpg", "gene"]].iterrows():
 cpg_corr = pd.DataFrame(rows)
 cpg_corr["q_value"] = bh_qvalues(cpg_corr["p_value"])
 cpg_corr = cpg_corr.sort_values("spearman_rho")
-cpg_corr.to_csv("../results/tables/cpg_expression_spearman.csv", index=False)
+cpg_corr.to_csv(PROJECT_ROOT / "results" / "tables" / "cpg_expression_spearman.csv", index=False)
 
-cpg_corr.to_csv("../results/tables/cpg_expression_spearman.csv", index=False)
+cpg_corr.to_csv(PROJECT_ROOT / "results" / "tables" / "cpg_expression_spearman.csv", index=False)
 print(f"Saved cpg_expression_spearman.csv ({len(cpg_corr)} rows)")
 
 
@@ -142,9 +143,9 @@ gene_corr["min_rho_cpg"] = cpg_corr.loc[min_idx, "cpg"].values
 gene_corr["min_rho_qvalue"] = cpg_corr.loc[min_idx, "q_value"].values
 gene_corr = gene_corr.sort_values("mean_rho")
 gene_corr.index.name = "gene"
-gene_corr.to_csv("../results/tables/gene_methylation_expression_correlation_summary.csv")
+gene_corr.to_csv(PROJECT_ROOT / "results" / "tables" / "gene_methylation_expression_correlation_summary.csv")
 
-gene_corr.to_csv("../results/tables/gene_methylation_expression_correlation_summary.csv")
+gene_corr.to_csv(PROJECT_ROOT / "results" / "tables" / "gene_methylation_expression_correlation_summary.csv")
 print(f"Saved gene summary ({len(gene_corr)} genes)")
 
 
@@ -179,8 +180,8 @@ plt.axvline(0, color="black", linewidth=0.8)
 plt.xlabel("Mean Spearman rho (promoter methylation vs mRNA)")
 plt.title("Promoter Methylation - Expression Correlation per PAM50 Gene")
 plt.tight_layout()
-plt.savefig("../results/figures/methylation_expression_correlation_by_gene.png", dpi=300)
-plt.show()
+plt.savefig(PROJECT_ROOT / "results" / "figures" / "methylation_expression_correlation_by_gene.png", dpi=300)
+#plt.show()
 
 
 # ## Figure 2 — scatter plot 
@@ -197,8 +198,8 @@ plt.xlabel(f"Promoter methylation beta ({top_cpg})")
 plt.ylabel(f"log2 normalized expression ({top_gene})")
 plt.title(f"{top_gene}: methylation vs expression (Spearman rho={rho:.2f})")
 plt.tight_layout()
-plt.savefig("../results/figures/top_silencing_gene_scatter.png", dpi=300)
-plt.show()
+plt.savefig(PROJECT_ROOT / "results" / "figures" / "top_silencing_gene_scatter.png", dpi=300)
+#plt.show()
 
 print("Saved correlation tables and figures to ../results/.")
 

@@ -10,8 +10,10 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 from pathlib import Path
 
-DATA_DIR = Path("../data/processed")
-RESULTS_DIR = Path("../results")
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+DATA_DIR = PROJECT_ROOT / "data" / "processed"
+RESULTS_DIR = PROJECT_ROOT / "results"
 FIGURES_DIR = RESULTS_DIR / "figures"
 TABLES_DIR = RESULTS_DIR / "tables"
 
@@ -125,7 +127,7 @@ plt.savefig(
     facecolor=BG,
     bbox_inches="tight",
 )
-plt.show()
+#plt.show()
 
 
 # In[ ]:
@@ -273,7 +275,7 @@ plt.savefig(
     dpi=300,
 )
 
-plt.show()
+#plt.show()
 
 
 # In[12]:
@@ -366,24 +368,6 @@ annotation = (
     "have all values missing."
 )
 
-# ax.text(
-#     0.3,
-#     0.6,
-#     annotation,
-#     transform=ax.transAxes,
-#     ha="center",
-#     va="center",
-#     fontsize=text_size,
-#     color="#263238",
-#     linespacing=1.35,
-#     bbox=dict(
-#         boxstyle="round,pad=1.0",
-#         facecolor="#f1f8f7",
-#         edgecolor=teal,
-#         linewidth=1.0
-#     )
-# )
-
 ax.set_yscale("log")
 ax.set_ylim(1e-1, 101)
 
@@ -395,11 +379,9 @@ plt.savefig(
     facecolor=background
 )
 
-plt.show()
+#plt.show()
 
-# ------------------------------------------------------------------
-# Calculate percent missing for each CpG site
-# ------------------------------------------------------------------
+
 missing_per_cpg = meth[meth_features].isna().mean(axis=0) * 100
 
 # Exclude CpGs with 0% and 100% missingness
@@ -430,9 +412,6 @@ category_order = [
     ">50% Missingness"
 ]
 
-# ------------------------------------------------------------------
-# Categorize partially missing CpG sites
-# ------------------------------------------------------------------
 missingness_categories = pd.Series(
     np.select(
         [
@@ -457,7 +436,6 @@ category_counts = (
 
 total_cpgs = category_counts.sum()
 
-# Optional summary table
 summary = pd.DataFrame({
     "CpG sites": category_counts,
     "Percent": category_counts / total_cpgs * 100
@@ -554,7 +532,7 @@ plt.savefig(
     bbox_inches="tight"
 )
 
-plt.show()
+#plt.show()
 
 
 # In[ ]:
@@ -705,7 +683,7 @@ plt.savefig(
     dpi=300,
     facecolor=BG
 )
-plt.show()
+#plt.show()
 
 # Colors
 BG = "#fcfcfc"
@@ -797,7 +775,7 @@ plt.savefig(
     facecolor=BG
 )
 
-plt.show()
+#plt.show()
 
 
 # In[ ]:
@@ -840,10 +818,4 @@ summary.to_csv(
     TABLES_DIR / "week1_data_summary.csv",
     index=False
 )
-
-
-# In[ ]:
-
-
-
 

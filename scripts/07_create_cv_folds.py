@@ -10,8 +10,10 @@ from pathlib import Path
 
 from sklearn.model_selection import StratifiedKFold
 
-DATA_DIR = Path("../data/processed")
-RESULTS_DIR = Path("../results")
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+DATA_DIR = PROJECT_ROOT / "data" / "processed"
+RESULTS_DIR = PROJECT_ROOT / "results"
 TABLES_DIR = RESULTS_DIR / "tables"
 
 TABLES_DIR.mkdir(parents=True, exist_ok=True)

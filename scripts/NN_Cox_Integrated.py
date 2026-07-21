@@ -1,5 +1,7 @@
 import sys
-sys.path.append("../scripts") # For KNN helper function. 
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.append(PROJECT_ROOT / "scripts") # For KNN helper function. 
 
 import warnings
 from pathlib import Path
@@ -31,7 +33,7 @@ OUTPUT_BIAS = False
 
 RANDOM_STATE = 42    
 
-DATA_DIR = Path("../data/processed")  
+DATA_DIR = PROJECT_ROOT / "data" / "processed"  
 
 
 
@@ -215,7 +217,7 @@ def run_cv(
     rows = []
 
     # reset risk-score file once per run to avoid duplicate-fold appends
-    risk_path = Path("../results/tables/nn_integrated_risk_scores.csv")
+    risk_path = PROJECT_ROOT / "results" / "tables" / "nn_integrated_risk_scores.csv"
     if evaluate_on_test:
         risk_path.unlink(missing_ok=True)
 
@@ -268,7 +270,7 @@ def run_cv(
         # Save risk scores
         if evaluate_on_test:
             risk_scores = model.predict(x_te).ravel()
-            risk_path = Path("../results/tables/nn_integrated_risk_scores.csv")
+            risk_path = PROJECT_ROOT / "results" / "tables" / "nn_integrated_risk_scores.csv"
             pd.DataFrame([{"patient": pid, "fold": f, "risk_score": float(r)}
                 for pid, r in zip(test_ids, risk_scores)]).to_csv(
             risk_path, mode="a", header=not risk_path.exists(), index=False)
@@ -314,7 +316,7 @@ def summarize_cv_results(cv):
 
 def save_cv_results(cv, filename="nn_cox_integrated_cv_results.csv"):
 
-    out_dir = Path("../results/tables")
+    out_dir = PROJECT_ROOT / "results" / "tables"
     out_dir.mkdir(parents=True, exist_ok=True)
     cv.to_csv(out_dir / filename, index=False)
     print(f"Saved CV results to {out_dir / filename}")

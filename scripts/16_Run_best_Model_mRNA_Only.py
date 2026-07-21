@@ -1,13 +1,14 @@
 import sys
-sys.path.append("../scripts")
-
 from pathlib import Path
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.append(str(PROJECT_ROOT / "scripts"))
+
 import json
 import pandas as pd
 
 from NN_Cox_mRNA_Expression import run_cv
 
-OUT_DIR = Path("../results/tables")
+OUT_DIR = PROJECT_ROOT / "results" / "tables"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 BEST_CONFIG = {

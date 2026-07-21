@@ -9,10 +9,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-Path("../results/figures").mkdir(parents=True, exist_ok=True)
-Path("../results/tables").mkdir(parents=True, exist_ok=True)
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-meth = pd.read_csv("../data/processed/meth_pam50.csv", index_col=0)
+(Path(PROJECT_ROOT) / "results" / "figures").mkdir(parents=True, exist_ok=True)
+(Path(PROJECT_ROOT) / "results" / "tables").mkdir(parents=True, exist_ok=True)
+
+meth = pd.read_csv(Path(PROJECT_ROOT) / "data" / "processed" / "meth_pam50.csv", index_col=0)
 
 
 # overall beta-vals distribtion 
@@ -29,12 +31,12 @@ plt.title("Distribution of PAM50 Promoter Methylation Beta Values")
 plt.tight_layout()
 
 plt.savefig(
-    "../results/figures/pam50_promoter_beta_distribution_before_imputation.png",
+    Path(PROJECT_ROOT) / "results" / "figures" / "pam50_promoter_beta_distribution_before_imputation.png",
     dpi=300,
     bbox_inches="tight"
 )
 
-plt.show()
+#plt.show()
 
 
 # In[11]:
@@ -46,7 +48,7 @@ summary = meth.describe().T
 summary["iqr"] = meth.quantile(0.75) - meth.quantile(0.25)
 
 summary.to_csv(
-    "../results/tables/pam50_promoter_cpg_variation_summary.csv"
+    Path(PROJECT_ROOT) / "results" / "tables" / "pam50_promoter_cpg_variation_summary.csv"
 )
 
 summary[["mean", "std", "min", "25%", "50%", "75%", "max", "iqr"]].sort_values(
@@ -84,18 +86,11 @@ for ax, cpg in zip(axes[1], low_var_cpgs):
 plt.tight_layout()
 
 plt.savefig(
-    "../results/figures/high_vs_low_variance_cpg_distributions.png",
+    Path(PROJECT_ROOT) / "results" / "figures" / "high_vs_low_variance_cpg_distributions.png",
     dpi=300,
     bbox_inches="tight"
 )
 
-plt.show()
+#plt.show()
 
 
-# In[ ]:
-
-
-
-
-
-# 

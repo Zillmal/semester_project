@@ -5,17 +5,13 @@ import seaborn as sns
 from scipy.stats import wilcoxon
 from pathlib import Path
 from matplotlib.ticker import MultipleLocator
+from lifelines import KaplanMeierFitter
+from lifelines.statistics import logrank_test
 
-try:
-    from lifelines import KaplanMeierFitter
-    from lifelines.statistics import logrank_test
-    HAS_LIFELINES = True
-except ImportError:
-    HAS_LIFELINES = False
-    print("lifelines not installed. pip install lifelines")
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-Path("../results/figures").mkdir(parents=True, exist_ok=True)
-Path("../results/tables").mkdir(parents=True, exist_ok=True)
+Path(PROJECT_ROOT / "results" / "figures").mkdir(parents=True, exist_ok=True)
+Path(PROJECT_ROOT / "results" / "tables").mkdir(parents=True, exist_ok=True)
 
 # shared palette - pink shades for the LASSO models, teal for the neural nets
 model_colors = {
@@ -27,12 +23,12 @@ model_colors = {
 ORDER = ["mRNA-only LASSO", "Multi-omics LASSO", "mRNA-only NN", "Multi-omics NN"]
 
 # load the four models' fold-level CV results + the survival table
-lasso_mrna  = pd.read_csv("../results/tables/lasso_cox_cv_results.csv")
-lasso_multi = pd.read_csv("../results/tables/lasso_cox_multiomics_cv_results.csv")
-nn_mrna     = pd.read_csv("../results/tables/nn_mRNA_only_best_model_folds.csv")
-nn_multi    = pd.read_csv("../results/tables/nn_integrated_best_model_folds.csv")
+lasso_mrna  = pd.read_csv(PROJECT_ROOT / "results" / "tables" / "lasso_cox_cv_results.csv")
+lasso_multi = pd.read_csv(PROJECT_ROOT / "results" / "tables" / "lasso_cox_multiomics_cv_results.csv")
+nn_mrna     = pd.read_csv(PROJECT_ROOT / "results" / "tables" / "nn_mRNA_only_best_model_folds.csv")
+nn_multi    = pd.read_csv(PROJECT_ROOT / "results" / "tables" / "nn_integrated_best_model_folds.csv")
 
-surv = pd.read_csv("../data/processed/survival_luminal_clean.csv").set_index("patient")
+surv = pd.read_csv(PROJECT_ROOT / "data" / "processed" / "survival_luminal_clean.csv").set_index("patient")
 
 lasso_mrna["model"]  = "mRNA-only LASSO"
 lasso_multi["model"] = "Multi-omics LASSO"
@@ -52,7 +48,7 @@ summary = (
 )
 summary["model"] = pd.Categorical(summary["model"], categories=ORDER, ordered=True)
 summary = summary.sort_values("model").reset_index(drop=True)
-summary.to_csv("../results/tables/all_models_performance_summary.csv", index=False)
+summary.to_csv(PROJECT_ROOT / "results" / "tables" / "all_models_performance_summary.csv", index=False)
 print(summary.to_string(index=False))
 
 # bar chart: mean test C-index with SD whiskers
@@ -128,8 +124,8 @@ ax.spines["left"].set_linewidth(1)
 ax.spines["bottom"].set_linewidth(1)
 
 plt.tight_layout()
-plt.savefig("../results/figures/cindex_all_models_mean_sd.png", dpi=300)
-plt.show()
+plt.savefig(PROJECT_ROOT / "results" / "figures" / "cindex_all_models_mean_sd.png", dpi=300)
+#plt.show()
 
 # full spread of the C-index across the 5 folds
 model_order = [
@@ -285,13 +281,13 @@ ax.spines["bottom"].set_color("#777777")
 plt.tight_layout()
 
 plt.savefig(
-    "../results/figures/cindex_all_models_boxplot.png",
+    PROJECT_ROOT / "results" / "figures" / "cindex_all_models_boxplot.png",
     dpi=300,
     facecolor=background,
     bbox_inches="tight"
 )
 
-plt.show()
+#plt.show()
 
 # same scores again, this time broken out fold by fold
 fig, ax = plt.subplots(figsize=(9, 5))
@@ -314,8 +310,8 @@ ax.set_ylim(0.25, 0.85)
 ax.legend(fontsize=9)
 ax.spines[["top", "right"]].set_visible(False)
 plt.tight_layout()
-plt.savefig("../results/figures/cindex_per_fold_all_models.png", dpi=300)
-plt.show()
+plt.savefig(PROJECT_ROOT / "results" / "figures" / "cindex_per_fold_all_models.png", dpi=300)
+#plt.show()
 
 # how stable is LASSO's feature count from fold to fold?
 lasso_only = combined[combined["model"].isin(["mRNA-only LASSO", "Multi-omics LASSO"])]
@@ -342,8 +338,8 @@ ax.set_xlabel("")
 ax.set_ylabel("Features selected")
 ax.spines[["top", "right"]].set_visible(False)
 plt.tight_layout()
-plt.savefig("../results/figures/feature_selection_stability.png", dpi=300)
-plt.show()
+plt.savefig(PROJECT_ROOT / "results" / "figures" / "feature_selection_stability.png", dpi=300)
+#plt.show()
 
 # paired Wilcoxon on the fold C-indices
 pairs = [
@@ -365,14 +361,14 @@ for m1, m2, question in pairs:
     print(f"{question}: p={pval:.4f} ({'significant' if pval < 0.05 else 'not significant'})")
 
 pd.DataFrame(wilcoxon_rows).to_csv(
-    "../results/tables/wilcoxon_model_comparisons.csv", index=False)
+    PROJECT_ROOT / "results" / "tables" / "wilcoxon_model_comparisons.csv", index=False)
 
 # Kaplan-Meier survival split by predicted risk (median cut)
 km_files = {
-    "mRNA-only LASSO Cox":   "../results/tables/lasso_cox_mrna_risk_scores.csv",
-    "Multi-omics LASSO Cox": "../results/tables/lasso_cox_multiomics_risk_scores.csv",
-    "mRNA-only Neural Network":      "../results/tables/nn_mrna_only_risk_scores.csv",
-    "Multi-omics Neural Network":    "../results/tables/nn_integrated_risk_scores.csv",
+    "mRNA-only LASSO Cox":   PROJECT_ROOT / "results" / "tables" / "lasso_cox_mrna_risk_scores.csv",
+    "Multi-omics LASSO Cox": PROJECT_ROOT / "results" / "tables" / "lasso_cox_multiomics_risk_scores.csv",
+    "mRNA-only Neural Network":      PROJECT_ROOT / "results" / "tables" / "nn_mrna_only_risk_scores.csv",
+    "Multi-omics Neural Network":    PROJECT_ROOT / "results" / "tables" / "nn_integrated_risk_scores.csv",
 }
 
 TEXT_SIZE = 19
@@ -513,13 +509,13 @@ for model_name, fpath in km_files.items():
     )
 
     plt.savefig(
-        f"../results/figures/km_risk_groups_{fname}.png",
+        PROJECT_ROOT / "results" / "figures" / f"km_risk_groups_{fname}.png",
         dpi=300,
         facecolor=BG,
         bbox_inches="tight"
     )
 
-    plt.show()
+    #plt.show()
 
     km_results.append({
         "model": model_name,
@@ -532,7 +528,7 @@ if km_results:
     km_df = pd.DataFrame(km_results)
 
     km_df.to_csv(
-        "../results/tables/km_risk_group_logrank.csv",
+        PROJECT_ROOT / "results" / "tables" / "km_risk_group_logrank.csv",
         index=False
     )
 
@@ -563,7 +559,7 @@ if km_results:
         ]
 
     risk_table.to_csv(
-        f"../results/tables/km_risk_table_{fname}.csv",
+        PROJECT_ROOT / "results" / "tables" / f"km_risk_table_{fname}.csv",
         index=False
     )
 
@@ -573,7 +569,7 @@ if km_results:
 report_table = summary.copy()
 report_table.columns = ["Model", "Mean C-index", "SD", "Min", "Max"]
 
-km_path = Path("../results/tables/km_risk_group_logrank.csv")
+km_path = PROJECT_ROOT / "results" / "tables" / "km_risk_group_logrank.csv"
 if km_path.exists():
     km_df = pd.read_csv(km_path)
     # KM results use the long model names; map them to the short names used above
@@ -592,5 +588,5 @@ else:
           "*_risk_scores.csv files, then re-run section 2. "
           "Showing performance summary without the KM column.\n")
 
-report_table.to_csv("../results/tables/final_model_comparison_table.csv", index=False)
+report_table.to_csv(PROJECT_ROOT / "results" / "tables" / "final_model_comparison_table.csv", index=False)
 print(report_table.to_string(index=False))

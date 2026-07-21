@@ -14,16 +14,18 @@ from pathlib import Path
 from sklearn.impute import KNNImputer
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
-Path("../results/figures").mkdir(parents=True, exist_ok=True)
-Path("../results/tables").mkdir(parents=True, exist_ok=True)
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-meth = pd.read_csv("../data/processed/meth_pam50.csv", index_col=0)
+Path(PROJECT_ROOT / "results" / "figures").mkdir(parents=True, exist_ok=True)
+Path(PROJECT_ROOT / "results" / "tables").mkdir(parents=True, exist_ok=True)
+
+meth = pd.read_csv(PROJECT_ROOT / "data" / "processed" / "meth_pam50.csv", index_col=0)
 
 print("Methylation matrix shape:", meth.shape)
 print("Total missing beta values:", meth.isna().sum().sum())
 print("Overall missing fraction:", meth.isna().mean().mean())
 
-display(meth.iloc[:5, :5])
+#display(meth.iloc[:5, :5])
 
 
 # In[2]:
@@ -36,7 +38,7 @@ missing_before = pd.DataFrame({
 })
 
 missing_before.to_csv(
-    "../results/tables/methylation_missingness_per_patient_before_imputation.csv"
+    PROJECT_ROOT / "results" / "tables" / "methylation_missingness_per_patient_before_imputation.csv"
 )
 
 cpg_missing_before = pd.DataFrame({
@@ -45,7 +47,7 @@ cpg_missing_before = pd.DataFrame({
 })
 
 cpg_missing_before.to_csv(
-    "../results/tables/methylation_missingness_per_cpg_before_imputation.csv"
+    PROJECT_ROOT / "results" / "tables" / "methylation_missingness_per_cpg_before_imputation.csv"
 )
 
 print(missing_before["missing_fraction"].describe())
@@ -61,7 +63,7 @@ all_missing_cpgs = meth.columns[meth.isna().all()]
 print("All-missing CpGs:", len(all_missing_cpgs))
 
 pd.Series(all_missing_cpgs, name="cpg_id").to_csv(
-    "../results/tables/all_missing_cpgs_removed_before_knn.csv",
+    PROJECT_ROOT / "results" / "tables" / "all_missing_cpgs_removed_before_knn.csv",
     index=False
 )
 
@@ -139,7 +141,7 @@ knn_comparison = pd.DataFrame(results).sort_values("MAE")
 print(knn_comparison)
 
 knn_comparison.to_csv(
-    "../results/tables/knn_neighbor_sensitivity.csv",
+    PROJECT_ROOT / "results" / "tables" / "knn_neighbor_sensitivity.csv",
     index=False
 )
 
@@ -192,11 +194,10 @@ assert np.isclose(max_difference_observed, 0), (
 
 # save the imputed methylation matrix
 meth_imputed.to_csv(
-    "../data/processed/meth_pam50_knn_imputed.csv"
+    PROJECT_ROOT / "data" / "processed" / "meth_pam50_knn_imputed.csv"
 )
 
-print("Saved: ../data/processed/meth_pam50_knn_imputed.csv")
-
+print("Saved:", PROJECT_ROOT / "data" / "processed" / "meth_pam50_knn_imputed.csv")
 
 # In[8]:
 
@@ -235,11 +236,11 @@ plt.legend()
 plt.tight_layout()
 
 plt.savefig(
-    "../results/figures/observed_vs_imputed_beta_distribution.png",
+    PROJECT_ROOT / "results" / "figures" / "observed_vs_imputed_beta_distribution.png",
     dpi=300
 )
 
-plt.show()
+#plt.show()
 
 print("Number of imputed values:", len(imputed_values))
 print(pd.Series(imputed_values).describe())
@@ -288,11 +289,11 @@ imputation_summary = pd.DataFrame({
 })
 
 imputation_summary.to_csv(
-    "../results/tables/knn_imputation_summary.csv",
+    PROJECT_ROOT / "results" / "tables" / "knn_imputation_summary.csv",
     index=False
 )
 
-display(imputation_summary)
+#display(imputation_summary)
 
 
 # In[ ]:

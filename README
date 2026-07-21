@@ -1,4 +1,4 @@
-## Prerequisites
+Prerequisites
 
 - R (version 4.5 or later)
 - Python (version 3.11 or later)
@@ -9,11 +9,11 @@
 
 --------------------------------------------------------------------------------
 
-### Installing the GDC Data Transfer Tool (`gdc-client`)
+Installing the GDC Data Transfer Tool (gdc-client)
 
-This project uses the official **GDC Data Transfer Tool (`gdc-client`)** to download TCGA molecular data. Compared with the default API downloader, the client is more reliable for large datasets because it supports automatic retries and download resumption.
+This project uses the official GDC Data Transfer Tool (gdc-client) to download TCGA molecular data. Compared with the default API downloader, the client is more reliable for large datasets because it supports automatic retries and download resumption.
 
-1. Download the appropriate version of `gdc-client` for your operating system from the official GDC website.
+1. Download the appropriate version of gdc-client for your operating system from the official GDC website.
 2. Verify that the installation was successful by running:
 
 ```bash
@@ -22,12 +22,12 @@ gdc-client --version
 
 On macOS, you may receive a security warning the first time you open the executable. If this occurs:
 
-1. Attempt to open `gdc-client` once.
+1. Attempt to open gdc-client once.
 2. Open **System Settings → Privacy & Security**.
-3. Select **Open Anyway** for `gdc-client`.
+3. Select **Open Anyway** for gdc-client.
 4. Confirm that you wish to run the application.
 
-`01_Initial_Data_Download.R` will automatically search for `gdc-client` in several common installation locations. If it is installed elsewhere, specify its location before running the script:
+01_Initial_Data_Download.R will automatically search for gdc-client in several common installation locations. If it is installed elsewhere, specify its location before running the script:
 
 ```r
 Sys.setenv(GDC_CLIENT_PATH = "/full/path/to/gdc-client")
@@ -35,9 +35,9 @@ Sys.setenv(GDC_CLIENT_PATH = "/full/path/to/gdc-client")
 
 --------------------------------------------------------------------------------
 
-## 00_install_packages_for_R.R:
+00_install_packages_for_R.R:
 
-**Purpose:** Install all required R packages for the project.
+Purpose: Install all required R packages for the project.
 
 This script:
 
@@ -52,7 +52,7 @@ Run this script once before executing the remaining R scripts.
 
 01_Initial_Data_Download.R:
 
-**Purpose:** Download raw multi-omics data from TCGA-BRCA
+Purpose: Download raw multi-omics data from TCGA-BRCA
 
 1. Downloads the following TCGA-BRCA datasets using TCGAbiolinks:
 - DNA methylation (Illumina Human Methylation 450K beta values)
@@ -200,7 +200,23 @@ Output:
 
 --------------------------------------------------------------------------------
 
-06_week1_eda.ipynb / 06_week1_eda.py:
+06_Methylation_EDA.py:
+
+Purpose: Assess the distribution and variability of PAM50 promoter methylation beta values 
+prior to imputation.
+
+1. Loads the processed PAM50 promoter methylation dataset.
+2. Examines the overall distribution of observed methylation beta values and saves:
+	- pam50_promoter_beta_distribution_before_imputation.png
+3. Calculates summary statistics for each CpG site, including the interquartile range (IQR), and saves:
+	- pam50_promoter_cpg_variation_summary.csv
+4. Identifies low-variation CpG sites (IQR < 0.02) to assess whether promoter methylation features exhibit sufficient biological variability.
+5. Visualizes the distributions of the highest- and lowest-variance CpG sites and saves:
+	- high_vs_low_variance_cpg_distributions.png
+
+--------------------------------------------------------------------------------
+
+06_week1_eda.py:
 
 Purpose: Perform initial exploratory data analysis of the exported PAM50 cohort
 
@@ -231,7 +247,7 @@ Creates and saves a cleaned survival outcome table containing:
 
 --------------------------------------------------------------------------------
 
-07_create_cv_folds.ipynb / 07_create_cv_folds.py:
+07_create_cv_folds.py:
 
 Purpose: Create reproducible stratified cross-validation folds for survival modeling
 
@@ -258,7 +274,6 @@ the same patient splits.
 
 --------------------------------------------------------------------------------
 
-08_Methylation_KNN_Imputation_For_Plotting.ipynb /
 08_methylation_knn_imputation_For_Plotting.py:
 
 Purpose: Perform exploratory KNN imputation of PAM50 promoter methylation beta

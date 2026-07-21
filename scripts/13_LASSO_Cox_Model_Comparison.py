@@ -2,13 +2,16 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import wilcoxon
+from pathlib import Path
 
 
 
 # load data
 
-mRNA = pd.read_csv("../results/tables/lasso_cox_cv_results.csv")
-multi = pd.read_csv("../results/tables/lasso_cox_multiomics_cv_results.csv")
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+mRNA = pd.read_csv(PROJECT_ROOT / "results" / "tables" / "lasso_cox_cv_results.csv")
+multi = pd.read_csv(PROJECT_ROOT / "results" / "tables" / "lasso_cox_multiomics_cv_results.csv")
 
 mRNA["model"] = "mRNA-only"
 multi["model"] = "Multi-omics"
@@ -43,7 +46,7 @@ plt.title("C-index comparison (5-fold CV)")
 plt.ylim(0.3, 0.8)
 plt.tight_layout()
 
-plt.savefig("../results/figures/cindex_boxplot.png", dpi=300)
+plt.savefig(PROJECT_ROOT / "results" / "figures" / "cindex_boxplot.png", dpi=300)
 plt.close()
 
 
@@ -73,7 +76,7 @@ plt.errorbar(
 plt.title("Mean C-index ± SD")
 plt.ylim(0.3, 0.8)
 plt.tight_layout()
-plt.savefig("results/figures/cindex_mean_sd.png", dpi=300)
+plt.savefig(PROJECT_ROOT / "results" / "figures" / "cindex_mean_sd.png", dpi=300)
 plt.close()
 
 
@@ -87,5 +90,5 @@ sns.stripplot(data=combined_df, x="model", y="n_features_selected",
 
 plt.title("Feature selection stability")
 plt.tight_layout()
-plt.savefig("results/figures/feature_selection_comparison.png", dpi=300)
+plt.savefig(PROJECT_ROOT / "results" / "figures" / "feature_selection_comparison.png", dpi=300)
 plt.close()

@@ -15,14 +15,16 @@ import matplotlib.pyplot as plt
 from lifelines import KaplanMeierFitter
 from lifelines.statistics import logrank_test
 
-Path("../results/figures").mkdir(parents=True, exist_ok=True)
-Path("../results/tables").mkdir(parents=True, exist_ok=True)
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+Path(PROJECT_ROOT / "results" / "figures").mkdir(parents=True, exist_ok=True)
+Path(PROJECT_ROOT / "results" / "tables").mkdir(parents=True, exist_ok=True)
 
 # --- Load --------------------------------------------------------------------
-surv = pd.read_csv("../data/processed/survival_luminal_clean.csv").set_index("patient")
-meth = pd.read_csv("../data/processed/meth_pam50_knn_imputed.csv", index_col=0)
-cpg_gene = pd.read_csv("../data/processed/cpg_gene_map.csv")
-gene_sum = pd.read_csv("../results/tables/gene_methylation_expression_correlation_summary.csv")
+surv = pd.read_csv(PROJECT_ROOT / "data" / "processed" / "survival_luminal_clean.csv").set_index("patient")
+meth = pd.read_csv(PROJECT_ROOT / "data" / "processed" / "meth_pam50_knn_imputed.csv", index_col=0)
+cpg_gene = pd.read_csv(PROJECT_ROOT / "data" / "processed" / "cpg_gene_map.csv")
+gene_sum = pd.read_csv(PROJECT_ROOT / "results" / "tables" / "gene_methylation_expression_correlation_summary.csv")
 
 # Keep patients with a valid survival time; express time in years for readability.
 surv = surv[surv["time"].notna() & (surv["time"] >= 0)].copy()
@@ -126,7 +128,7 @@ def two_group_km(df, group_col, title, fname, order):
     )
 
     plt.tight_layout()
-    plt.savefig(f"../results/figures/{fname}", dpi=300, facecolor=BG, bbox_inches="tight")
+    plt.savefig(PROJECT_ROOT / "results" / "figures" / fname, dpi=300, facecolor=BG, bbox_inches="tight")
     plt.close(fig)
 
     return {"comparison": title, "group1": g0, "n1": len(a),
@@ -164,7 +166,7 @@ results.append(two_group_km(
 
 # --- Save log-rank results ---------------------------------------------------
 res_df = pd.DataFrame(results)
-res_df.to_csv("../results/tables/survival_logrank_tests.csv", index=False)
+res_df.to_csv(PROJECT_ROOT / "results" / "tables" / "survival_logrank_tests.csv", index=False)
 print(res_df.to_string(index=False))
 print(f"\nMethylation strata based on gene: {top_gene} "
       f"({len(gene_cpgs)} promoter CpGs, median beta = {median:.3f})")

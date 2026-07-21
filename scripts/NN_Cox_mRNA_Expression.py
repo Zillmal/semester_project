@@ -11,6 +11,9 @@ from sksurv.metrics import concordance_index_censored
 from pycox.models import CoxPH
 warnings.simplefilter("ignore")
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DATA_DIR = PROJECT_ROOT / "data" / "processed"
+
 
 # network architecture
 
@@ -20,8 +23,6 @@ VAL_FRACTION  = 0.20
 OUTPUT_BIAS = False 
 
 RANDOM_STATE = 42        
-
-DATA_DIR = Path("../data/processed") 
 
 def load_data(data_dir=DATA_DIR, random_state=RANDOM_STATE):
     np.random.seed(random_state)
@@ -120,7 +121,7 @@ def run_cv(learning_rate,
     rows = []
 
     # reset risk-score file once per run to avoid duplicate-fold appends
-    risk_path = Path("../results/tables/nn_mrna_only_risk_scores.csv")
+    risk_path = PROJECT_ROOT / "results" / "tables" / "nn_mrna_only_risk_scores.csv"
     if evaluate_on_test:
         risk_path.unlink(missing_ok=True)
 
@@ -172,7 +173,7 @@ def run_cv(learning_rate,
         # Save risk scores
         if evaluate_on_test:
             risk_scores = model.predict(x_te).ravel()
-            risk_path = Path("../results/tables/nn_mrna_only_risk_scores.csv")
+            risk_path = PROJECT_ROOT / "results" / "tables" / "nn_mrna_only_risk_scores.csv"
             pd.DataFrame([{"patient": pid, "fold": f, "risk_score": float(r)}
                 for pid, r in zip(test_ids, risk_scores)]).to_csv(
             risk_path, mode="a", header=not risk_path.exists(), index=False)
