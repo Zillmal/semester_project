@@ -43,8 +43,8 @@ To reproduce the complete analysis, run:
 ./run_pipeline.sh
 ```
 All output tables and figures are written to:
-results/tables/ 
-results/figures/
+- results/tables/ 
+- results/figures/
 
 --------------------------------------------------------------------------------
 
